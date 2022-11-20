@@ -2,7 +2,6 @@ import Combine
 import UIKit
 import SwiftUI
 
-extension String: InfiniteScollingData { }
 
 class CollectionPageView<Cell: UICollectionViewCell, Value: Strideable>:
     UIView, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource
@@ -163,7 +162,11 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int {
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        self.updateSelected(reload: !self.collectionView.isDecelerating && self.nextValue == nil )
+//        self.updateSelected(reload: self.nextValue == nil )
+    }
+    
+    func scrollViewShouldScrollToTop(_ scrollView: UIScrollView) -> Bool {
+        false
     }
     
     private func updateSelected(reload: Bool = true) {
