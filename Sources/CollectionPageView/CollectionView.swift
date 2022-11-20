@@ -7,8 +7,6 @@ class CollectionPageView<Cell: UICollectionViewCell, Value: Strideable>:
     UIView, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource
 where Value: Comparable, Value: Strideable, Value.Stride == Int {
 
-    private let selectionFeedback = UISelectionFeedbackGenerator()
-
     public let publisher: CurrentValueSubject<Value, Never>
 
 
