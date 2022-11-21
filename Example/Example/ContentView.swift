@@ -12,7 +12,7 @@ struct ContentView: View {
     @State var selected = 0
     var body: some View {
         VStack {
-            HStack {
+            HStack(spacing: 20) {
                 Button("-20") {
                     self.selected = -20
                 }
@@ -31,6 +31,7 @@ struct ContentView: View {
                     self.selected = 20
                 }
             }
+            .font(.headline)
             PageView(selected: $selected) { value in
                 VStack {
                     Spacer()
@@ -43,8 +44,9 @@ struct ContentView: View {
                     Spacer()
                 }
                 .background([Color.red, .blue, .green][abs(value % 3)])
+                .animation(.default, value: value)
             }
-            .padding(.horizontal, CGFloat(selected))
+//            .padding(.horizontal, CGFloat(selected) * 10)
         }
     }
 }

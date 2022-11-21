@@ -23,7 +23,8 @@ struct PageViewWrapper<Cell: View, Value: Hashable>: UIViewRepresentable where V
         
     let cell: (Value) -> Cell
     
-    typealias UIViewType = CollectionPageView<UIHostingCell<Cell>, Value>
+//    typealias UIViewType = CollectionPageView<UIHostingCell<Cell>, Value>
+        typealias UIViewType = ScrollPageView<UIHostingView<Cell>, Value>
     
     init(selected: Binding<Value>,
          cell: @escaping (Value) -> Cell) {
@@ -70,6 +71,8 @@ final class UIHostingView<Content: View>: UIView {
     private var hosting: UIHostingController<Content>?
     
     func set(value content: Content) {
+        self.hosting?.view.removeFromSuperview()
+        self.hosting = nil
         if let hosting = self.hosting {
             hosting.rootView = content
         } else {
