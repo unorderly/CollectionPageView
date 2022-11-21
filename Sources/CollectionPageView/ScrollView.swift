@@ -77,7 +77,6 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int {
     
     func updateViews() {
         var reusable = Array(self.views.filter({ !self.pages.contains($0.key) }).values)
-        print("PageView reused", reusable.count)
         var updated: [Value: Cell] = [:]
         for value in pages {
             if let existing = self.views[value] {
@@ -176,7 +175,6 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int {
         let selectedOffset = self.offset(for: selected)
         if abs(centerOffset.x - selectedOffset.x) / self.bounds.width >= CGFloat(self.bufferSize - 1)
             || (force && self.centerPage != self.selected) {
-            print("PageView recentered", self.selected, self.centerPage, force)
             self.centerPage = self.selected
             self.updatePages()
             self.updateViews()
