@@ -149,7 +149,7 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int {
             if self.nextValue == nil || self.nextValue == self.pages[index] {
                 self.nextValue = nil
                 self.selected = self.pages[index]
-            }a
+            }
         }
     }
     
