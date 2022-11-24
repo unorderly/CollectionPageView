@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Leo Mehlig on 21.11.22.
 //
@@ -35,17 +35,17 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int {
     private var centerPage: Value
     
     private func updatePages() {
-        var pages = Array(self.centerPage.advanced(by: -bufferSize)...self.centerPage.advanced(by: bufferSize))
-        if let next = self.nextValue, !pages.contains(next) {
-            if pages[0] > next {
-                pages.removeFirst()
-                pages.insert(next, at: 0)
+        if let next = self.nextValue {
+            if self.centerPage > next {
+                self.pages = Array(next.advanced(by: -bufferSize + 1)...next)
+                + Array(self.centerPage...self.centerPage.advanced(by: bufferSize))
             } else {
-                pages.removeLast()
-                pages.append(next)
+                self.pages = Array(self.centerPage.advanced(by: -bufferSize)...self.centerPage)
+                + Array(next...next.advanced(by: bufferSize - 1))
             }
+        } else {
+            self.pages = Array(self.centerPage.advanced(by: -bufferSize)...self.centerPage.advanced(by: bufferSize))
         }
-        self.pages = pages
     }
     
     init(selected: Value,
@@ -134,8 +134,14 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int {
         self.recenter()
     }
     
-    func updateSelection() {
+    func updateSelection(force: Bool = false) {
         guard self.bounds.width > 0 else {
+            return
+        }
+        let offset = self.offset(for: self.selected).x
+        guard force
+                || self.contentOffset.x <= offset - self.bounds.width
+                || self.contentOffset.x >= offset + self.bounds.width else {
             return
         }
         let index = Int(round(self.contentOffset.x / self.bounds.width))
@@ -143,7 +149,7 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int {
             if self.nextValue == nil || self.nextValue == self.pages[index] {
                 self.nextValue = nil
                 self.selected = self.pages[index]
-            }
+            }a
         }
     }
     
@@ -152,11 +158,13 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int {
     }
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        self.updateSelection(force: true)
         self.ensurePaging()
         self.recenter(force: true)
     }
     
     func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+        self.updateSelection(force: true)
         self.ensurePaging()
         self.recenter(force: true)
     }
