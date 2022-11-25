@@ -8,10 +8,16 @@
 import UIKit
 import SwiftUI
 import Combine
+import os
 
+private let logger = Logger(
+    subsystem: Bundle.main.bundleIdentifier!,
+    category: "PageView"
+)
 class ScrollPageView<Cell: UIView, Value: Hashable>:
     UIScrollView, UIScrollViewDelegate
-where Value: Comparable, Value: Strideable, Value.Stride == Int {
+where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomStringConvertible {
+    
     
     let publisher: CurrentValueSubject<Value, Never>
 
@@ -35,7 +41,7 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int {
     private var centerPage: Value
     
     private func updatePages() {
-        if let next = self.nextValue {
+        if let next = self.nextValue, next != self.centerPage {
             if self.centerPage > next {
                 self.pages = Array(next.advanced(by: -bufferSize + 1)...next)
                 + Array(self.centerPage...self.centerPage.advanced(by: bufferSize))
@@ -65,12 +71,17 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int {
         self.contentOffset = self.offset(for: self.selected)
     }
     
-    
+    var animationCounter = 0
     func select(value: Value) {
-        if value != self.selected {
+        if value != self.nextValue && (self.selected != value || self.nextValue != nil) {
             self.nextValue = value
+            DispatchQueue.main.async {
+                self.publisher.send(value)
+            }
             self.updatePages()
             self.updateViews()
+            logger.info("Selected \(value.description) manually")
+            self.animationCounter += 1
             self.setContentOffset(self.offset(for: value), animated: true)
         }
     }
@@ -147,6 +158,7 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int {
         let index = Int(round(self.contentOffset.x / self.bounds.width))
         if self.pages.indices ~= index {
             if self.nextValue == nil || self.nextValue == self.pages[index] {
+                logger.info("Changing page from \(self.selected.description) to \(self.pages[index].description) with offset=\(self.contentOffset.x / self.bounds.width), next=\(self.nextValue?.description ?? "none"), force=\(force)")
                 self.nextValue = nil
                 self.selected = self.pages[index]
             }
@@ -164,6 +176,11 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int {
     }
     
     func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+        self.animationCounter -= 1
+        logger.info("Scrolling ended next=\(self.nextValue?.description ?? "none"), counter=\(self.animationCounter)")
+        guard self.animationCounter == 0 else {
+            return
+        }
         self.updateSelection(force: true)
         self.ensurePaging()
         self.recenter(force: true)
@@ -171,6 +188,7 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int {
     
     func ensurePaging() {
         if abs(self.contentOffset.x - self.offset(for: self.selected).x) > 1 {
+            logger.info("Fixed paging from \(self.contentOffset.x) to \(self.offset(for: self.selected).x), next=\(self.nextValue?.description ?? "none")")
             self.contentOffset.x = self.offset(for: self.selected).x
         }
     }
@@ -183,6 +201,7 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int {
         let selectedOffset = self.offset(for: selected)
         if abs(centerOffset.x - selectedOffset.x) / self.bounds.width >= CGFloat(self.bufferSize - 1)
             || (force && self.centerPage != self.selected) {
+            logger.info("Recentered from \(self.centerPage) to \(self.selected)")
             self.centerPage = self.selected
             self.updatePages()
             self.updateViews()

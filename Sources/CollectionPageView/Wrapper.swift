@@ -1,7 +1,7 @@
 import Combine
 import SwiftUI
 
-public struct PageView<Cell: View, Value: Hashable>: View where Value: Comparable, Value: Strideable, Value.Stride == Int {
+public struct PageView<Cell: View, Value: Hashable>: View where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomStringConvertible {
     @Binding var selected: Value
     
     let page: (Value) -> Cell
@@ -17,7 +17,7 @@ public struct PageView<Cell: View, Value: Hashable>: View where Value: Comparabl
     }
 }
 
-struct PageViewWrapper<Cell: View, Value: Hashable>: UIViewRepresentable where Value: Comparable, Value: Strideable, Value.Stride == Int {
+struct PageViewWrapper<Cell: View, Value: Hashable>: UIViewRepresentable where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomStringConvertible {
     
     @Binding var selected: Value
     
