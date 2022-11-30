@@ -36,7 +36,7 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
     
     private var pages: [Value] = []
     private var nextValue: Value?
-    private var bufferSize = 3
+    private var bufferSize = 2
     private var views: [Value: Cell] = [:]
     private var centerPage: Value
     
@@ -109,6 +109,7 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
             $0.removeFromSuperview()
         }
         self.views = updated
+        self.forceRelayout = true
         self.setNeedsLayout()
     }
     
@@ -123,24 +124,29 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
     }
     
     var oldSize = CGSize.zero
+    var forceRelayout = false
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        let oldOffset = self.contentOffset.x
-        
-        self.contentSize = CGSize(width: self.bounds.width * CGFloat(self.views.count),
-                                  height: self.bounds.height)
-        for (index, value) in self.pages.enumerated() {
-            let offset = CGPoint(x: self.bounds.width * CGFloat(index),
-                                 y: 0)
-            self.views[value]?.frame = CGRect(origin: offset, size: self.bounds.size)
+        if oldSize != self.bounds.size || forceRelayout {
+            logger.info("Relayout (forced=\(self.forceRelayout))")
+            forceRelayout = false
+            let oldOffset = self.contentOffset.x
+            
+            self.contentSize = CGSize(width: self.bounds.width * CGFloat(self.views.count),
+                                      height: self.bounds.height)
+            for (index, value) in self.pages.enumerated() {
+                let offset = CGPoint(x: self.bounds.width * CGFloat(index),
+                                     y: 0)
+                self.views[value]?.frame = CGRect(origin: offset, size: self.bounds.size)
+            }
+            if self.oldSize.width <= 0 {
+                self.contentOffset = self.offset(for: self.selected)
+            } else {
+                self.contentOffset.x = oldOffset / oldSize.width * self.bounds.width
+            }
+            self.oldSize = self.bounds.size
         }
-        if self.oldSize.width <= 0 {
-            self.contentOffset = self.offset(for: self.selected)
-        } else {
-            self.contentOffset.x = oldOffset / oldSize.width * self.bounds.width
-        }
-        self.oldSize = self.bounds.size
         self.updateSelection()
         self.recenter()
     }
