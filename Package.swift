@@ -15,4 +15,3 @@ let package = Package(name: "CollectionPageView",
                           .target(name: "CollectionPageView",
                                   dependencies: [])
                       ])
-
