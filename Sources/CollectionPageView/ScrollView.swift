@@ -16,8 +16,8 @@ private let logger = Logger(
 class ScrollPageView<Cell: UIView, Value: Hashable>:
     UIScrollView, UIScrollViewDelegate
 where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomStringConvertible {
-    
-    
+
+
     let publisher: CurrentValueSubject<Value, Never>
 
 
@@ -30,29 +30,29 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
             }
         }
     }
-    
+
     var configureCell: (Cell, Value) -> Void
-    
+
     private var pages: [Value] = []
     private var nextValue: Value?
     private var bufferSize = 2
     private var views: [Value: Cell] = [:]
     private var centerPage: Value
-    
+
     private func updatePages() {
         if let next = self.nextValue, next != self.centerPage {
             if self.centerPage > next {
                 self.pages = Array(next.advanced(by: -bufferSize + 1)...next)
-                + Array(self.centerPage...self.centerPage.advanced(by: bufferSize))
+                    + Array(self.centerPage...self.centerPage.advanced(by: bufferSize))
             } else {
                 self.pages = Array(self.centerPage.advanced(by: -bufferSize)...self.centerPage)
-                + Array(next...next.advanced(by: bufferSize - 1))
+                    + Array(next...next.advanced(by: bufferSize - 1))
             }
         } else {
             self.pages = Array(self.centerPage.advanced(by: -bufferSize)...self.centerPage.advanced(by: bufferSize))
         }
     }
-    
+
     init(selected: Value,
          configureCell: @escaping (Cell, Value) -> Void) {
         self.configureCell = configureCell
@@ -69,7 +69,7 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
         self.updateViews()
         self.contentOffset = self.offset(for: self.selected)
     }
-    
+
     var animationCounter = 0
     func select(value: Value) {
         if value != self.nextValue && (self.selected != value || self.nextValue != nil) {
@@ -84,7 +84,7 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
             self.setContentOffset(self.offset(for: value), animated: true)
         }
     }
-    
+
     func updateViews() {
         var reusable = Array(self.views.filter({ !self.pages.contains($0.key) }).values)
         var updated: [Value: Cell] = [:]
@@ -99,7 +99,7 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
                     new = Cell(frame: .zero)
                     self.addSubview(new)
                 }
-                
+
                 self.configureCell(new, value)
                 updated[value] = new
             }
@@ -111,27 +111,27 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
         self.forceRelayout = true
         self.setNeedsLayout()
     }
-    
+
     func offset(for value: Value) -> CGPoint {
         let index = self.pages.firstIndex(of: value) ?? 0
         return .init(x: self.bounds.width * CGFloat(index), y: 0)
     }
-    
+
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     var oldSize = CGSize.zero
     var forceRelayout = false
-    
+
     override func layoutSubviews() {
         super.layoutSubviews()
         if oldSize != self.bounds.size || forceRelayout {
             logger.info("Relayout (forced=\(self.forceRelayout))")
             forceRelayout = false
             let oldOffset = self.contentOffset.x
-            
+
             self.contentSize = CGSize(width: self.bounds.width * CGFloat(self.views.count),
                                       height: self.bounds.height)
             for (index, value) in self.pages.enumerated() {
@@ -149,7 +149,7 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
         self.updateSelection()
         self.recenter()
     }
-    
+
     func updateSelection(force: Bool = false) {
         guard self.bounds.width > 0 else {
             return
@@ -169,17 +169,17 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
             }
         }
     }
-    
+
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         self.nextValue = nil
     }
-    
+
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         self.updateSelection(force: true)
         self.ensurePaging()
         self.recenter(force: true)
     }
-    
+
     func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
         self.animationCounter -= 1
         logger.info("Scrolling ended next=\(self.nextValue?.description ?? "none"), counter=\(self.animationCounter)")
@@ -190,14 +190,14 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
         self.ensurePaging()
         self.recenter(force: true)
     }
-    
+
     func ensurePaging() {
         if abs(self.contentOffset.x - self.offset(for: self.selected).x) > 1 {
             logger.info("Fixed paging from \(self.contentOffset.x) to \(self.offset(for: self.selected).x), next=\(self.nextValue?.description ?? "none")")
             self.contentOffset.x = self.offset(for: self.selected).x
         }
     }
-               
+
     func recenter(force: Bool = false) {
         guard self.bounds.width > 0 else {
             return

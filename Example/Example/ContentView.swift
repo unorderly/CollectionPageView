@@ -26,7 +26,7 @@ struct ContentView: View {
                 Button(">", action: {
                     self.selected += 1
                 })
-                
+
                 Button("20") {
                     self.selected = 20
                 }
@@ -46,7 +46,7 @@ struct ContentView: View {
                 .background([Color.red, .blue, .green][abs(value % 3)])
                 .animation(.default, value: value)
             }
-//            .padding(.horizontal, CGFloat(selected) * 10)
+            //            .padding(.horizontal, CGFloat(selected) * 10)
         }
     }
 }
