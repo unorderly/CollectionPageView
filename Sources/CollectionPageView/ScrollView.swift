@@ -35,18 +35,18 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
 
     private var pages: [Value] = []
     private var nextValue: Value?
-    private var bufferSize = 2
-    private var views: [Value: Cell] = [:]
+    private var bufferSize = 1
+    private var views: [Value: UIView] = [:]
     private var centerPage: Value
 
     private func updatePages() {
         if let next = self.nextValue, next != self.centerPage {
             if self.centerPage > next {
                 self.pages = Array(next.advanced(by: -bufferSize + 1)...next)
-                    + Array(self.centerPage...self.centerPage.advanced(by: bufferSize))
+                + Array(self.centerPage...self.centerPage.advanced(by: bufferSize))
             } else {
                 self.pages = Array(self.centerPage.advanced(by: -bufferSize)...self.centerPage)
-                    + Array(next...next.advanced(by: bufferSize - 1))
+                + Array(next...next.advanced(by: bufferSize - 1))
             }
         } else {
             self.pages = Array(self.centerPage.advanced(by: -bufferSize)...self.centerPage.advanced(by: bufferSize))
@@ -86,30 +86,68 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
     }
 
     func updateViews() {
-        var reusable = Array(self.views.filter({ !self.pages.contains($0.key) }).values)
-        var updated: [Value: Cell] = [:]
+        var (reusableCells, reusablePlaceholders) = self.views.filter({ !self.pages.contains($0.key) }).values
+            .compactMapSplit({ $0 as? Cell })
+        var updated: [Value: UIView] = [:]
         for value in pages {
             if let existing = self.views[value] {
-                updated[value] = existing
-            } else {
-                let new: Cell
-                if let reused = reusable.popLast() {
-                    new = reused
+                if !self.isViewVisible(for: value), let cell = existing as? Cell {
+                    let new: UIView
+                    if let reused = reusablePlaceholders.popLast() {
+                        new = reused
+                    } else {
+                        new = UIView(frame: .zero)
+                        self.addSubview(new)
+                    }
+                    updated[value] = new
+                    reusableCells.append(cell)
                 } else {
-                    new = Cell(frame: .zero)
-                    self.addSubview(new)
+                    updated[value] = existing
+                }
+            } else {
+                if self.isViewVisible(for: value) {
+                    let new: Cell
+                    if let reused = reusableCells.popLast() {
+                        new = reused
+                    } else {
+                        new = Cell(frame: .zero)
+                        self.addSubview(new)
+                    }
+                    self.configureCell(new, value)
+                    updated[value] = new
+
+                } else {
+                    let new: UIView
+                    if let reused = reusablePlaceholders.popLast() {
+                        new = reused
+                    } else {
+                        new = UIView(frame: .zero)
+                        self.addSubview(new)
+                    }
+                    updated[value] = new
                 }
 
-                self.configureCell(new, value)
-                updated[value] = new
             }
         }
-        reusable.forEach {
+        reusableCells.forEach {
+            $0.removeFromSuperview()
+        }
+        reusablePlaceholders.forEach {
             $0.removeFromSuperview()
         }
         self.views = updated
         self.forceRelayout = true
         self.setNeedsLayout()
+    }
+
+    func isViewVisible(for value: Value) -> Bool {
+        if value == selected || value == self.nextValue {
+            return true
+        } else {
+            let offset = self.offset(for: value).x
+            return (self.contentOffset.x ..< self.contentOffset.x + self.bounds.width)
+                .overlaps(offset ..< offset + self.bounds.width)
+        }
     }
 
     func offset(for value: Value) -> CGPoint {
@@ -148,6 +186,21 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
         }
         self.updateSelection()
         self.recenter()
+        self.checkVisible()
+    }
+
+    func checkVisible() {
+        for value in self.pages {
+            if self.isViewVisible(for: value), let oldView = self.views[value], !(oldView is Cell) {
+                let cell = Cell(frame: .zero)
+                cell.frame = oldView.frame
+                self.configureCell(cell, value)
+                oldView.removeFromSuperview()
+                self.addSubview(cell)
+                self.views[value] = cell
+
+            }
+        }
     }
 
     func updateSelection(force: Bool = false) {
@@ -204,7 +257,7 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
         }
         let centerOffset = self.offset(for: centerPage)
         let selectedOffset = self.offset(for: selected)
-        if abs(centerOffset.x - selectedOffset.x) / self.bounds.width >= CGFloat(self.bufferSize - 1)
+        if abs(centerOffset.x - selectedOffset.x) / self.bounds.width >= CGFloat(self.bufferSize)
             || (force && self.centerPage != self.selected) {
             logger.info("Recentered from \(self.centerPage) to \(self.selected)")
             self.centerPage = self.selected
@@ -213,5 +266,20 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
             let newOffset = self.offset(for: selected)
             self.contentOffset.x = self.contentOffset.x + (newOffset.x - selectedOffset.x)
         }
+    }
+}
+
+extension Collection {
+    func compactMapSplit<ElementOfResult>(_ transform: (Element) throws -> ElementOfResult?) rethrows -> ([ElementOfResult], [Element]) {
+        var filtered = [ElementOfResult]()
+        var rest = [Element]()
+        for element in self {
+            if let new = try transform(element) {
+                filtered.append(new)
+            } else {
+                rest.append(element)
+            }
+        }
+        return (filtered, rest)
     }
 }

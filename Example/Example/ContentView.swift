@@ -8,11 +8,17 @@
 import SwiftUI
 import CollectionPageView
 
+class ViewState: ObservableObject {
+    @Published var offset: Int = 0
+}
+
 struct ContentView: View {
     @State var selected = 0
+
+    @StateObject var state = ViewState()
     var body: some View {
         VStack {
-            HStack(spacing: 20) {
+            HStack {
                 Button("-20") {
                     self.selected = -20
                 }
@@ -31,26 +37,45 @@ struct ContentView: View {
                     self.selected = 20
                 }
             }
-            .font(.headline)
-            PageView(selected: $selected) { value in
-                VStack {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        Text("\(value)")
-                            .font(.largeTitle.bold())
-                        Spacer()
-                    }
-                    Spacer()
+            HStack {
+                Button("Decrease Offset") {
+                    self.state.offset -= 1
                 }
-                .background([Color.red, .blue, .green][abs(value % 3)])
-                .animation(.default, value: value)
+                Button("Increase Offset") {
+                    self.state.offset += 1
+                }
+
             }
-            //            .padding(.horizontal, CGFloat(selected) * 10)
+            PageView(selected: $selected) { value in
+                PageContent(value: value)
+            }
+            .environmentObject(state)
+//            .padding(.horizontal, CGFloat(selected))
         }
     }
 }
 
+struct PageContent: View {
+    var value: Int
+
+    @EnvironmentObject var state: ViewState
+
+    var body: some View {
+        print("Body", value, state.offset)
+        Self._printChanges()
+        return VStack {
+            Spacer()
+            HStack {
+                Spacer()
+                Text("\(value + state.offset)")
+                    .font(.largeTitle.bold())
+                Spacer()
+            }
+            Spacer()
+        }
+        .background([Color.red, .blue, .green][abs((value + state.offset) % 3)])
+    }
+}
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
