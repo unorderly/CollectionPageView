@@ -192,6 +192,7 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
     func checkVisible() {
         for value in self.pages {
             if self.isViewVisible(for: value), let oldView = self.views[value], !(oldView is Cell) {
+                logger.info("Replacing placeholder for \(value)")
                 let cell = Cell(frame: .zero)
                 cell.frame = oldView.frame
                 self.configureCell(cell, value)
@@ -262,9 +263,9 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
             logger.info("Recentered from \(self.centerPage) to \(self.selected)")
             self.centerPage = self.selected
             self.updatePages()
-            self.updateViews()
             let newOffset = self.offset(for: selected)
             self.contentOffset.x = self.contentOffset.x + (newOffset.x - selectedOffset.x)
+            self.updateViews()
         }
     }
 }
