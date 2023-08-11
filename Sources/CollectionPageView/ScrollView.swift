@@ -35,7 +35,7 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
 
     private var pages: [Value] = []
     private var nextValue: Value?
-    private var bufferSize = 1
+    private var bufferSize = 2
     private var views: [Value: UIView] = [:]
     private var centerPage: Value
 
@@ -225,10 +225,19 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
     }
 
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        print(#function, self.isDecelerating)
+        if self.isDecelerating {
+            self.recenter(force: true)
+        }
         self.nextValue = nil
     }
 
+    func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {
+        print(#function)
+    }
+
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        print(#function)
         self.updateSelection(force: true)
         self.ensurePaging()
         self.recenter(force: true)
@@ -258,7 +267,7 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
         }
         let centerOffset = self.offset(for: centerPage)
         let selectedOffset = self.offset(for: selected)
-        if abs(centerOffset.x - selectedOffset.x) / self.bounds.width >= CGFloat(self.bufferSize)
+        if (!self.isDecelerating && abs(centerOffset.x - selectedOffset.x) / self.bounds.width >= CGFloat(self.bufferSize))
             || (force && self.centerPage != self.selected) {
             logger.info("Recentered from \(self.centerPage) to \(self.selected)")
             self.centerPage = self.selected

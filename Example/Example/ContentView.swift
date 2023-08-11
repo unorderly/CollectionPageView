@@ -25,6 +25,7 @@ struct ContentView: View {
                 Button("<", action: {
                     self.selected -= 1
                 })
+                .keyboardShortcut(.leftArrow, modifiers: [.command])
                 Text("Selected: \(self.selected)")
                 Button("Random") {
                     self.selected = (-100...100).randomElement() ?? 0
@@ -32,6 +33,8 @@ struct ContentView: View {
                 Button(">", action: {
                     self.selected += 1
                 })
+                .keyboardShortcut(.rightArrow, modifiers: [.command])
+
 
                 Button("20") {
                     self.selected = 20
