@@ -70,18 +70,31 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
         self.contentOffset = self.offset(for: self.selected)
     }
 
-    var animationCounter = 0
+    var animator: UIViewPropertyAnimator?
     func select(value: Value) {
         if value != self.nextValue && (self.selected != value || self.nextValue != nil) {
             self.nextValue = value
             DispatchQueue.main.async {
                 self.publisher.send(value)
             }
+            if let animator, animator.isRunning {
+                animator.stopAnimation(true)
+            }
             self.updatePages()
             self.updateViews()
             logger.info("Selected \(value.description) manually")
-            self.animationCounter += 1
-            self.setContentOffset(self.offset(for: value), animated: true)
+            let animator = UIViewPropertyAnimator(duration: 0.3, curve: .easeInOut)
+            animator.addAnimations {
+                self.setContentOffset(self.offset(for: value), animated: false)
+            }
+            animator.addCompletion { position in
+                logger.info("Scrolling animation ended next=\(value.description), completed=\(position.rawValue)")
+                self.updateSelection(force: true)
+                self.ensurePaging()
+                self.recenter(force: true)
+            }
+            animator.startAnimation()
+            self.animator = animator
         }
     }
 
@@ -244,14 +257,14 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
     }
 
     func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
-        self.animationCounter -= 1
-        logger.info("Scrolling ended next=\(self.nextValue?.description ?? "none"), counter=\(self.animationCounter)")
-        guard self.animationCounter == 0 else {
-            return
-        }
-        self.updateSelection(force: true)
-        self.ensurePaging()
-        self.recenter(force: true)
+//        self.animationCounter -= 1
+//        logger.info("Scrolling ended next=\(self.nextValue?.description ?? "none"), counter=\(self.animationCounter)")
+//        guard self.animationCounter == 0 else {
+//            return
+//        }
+//        self.updateSelection(force: true)
+//        self.ensurePaging()
+//        self.recenter(force: true)
     }
 
     func ensurePaging() {
