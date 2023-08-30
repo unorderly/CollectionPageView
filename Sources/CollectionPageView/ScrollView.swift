@@ -62,6 +62,7 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
         super.init(frame: .zero)
         self.showsHorizontalScrollIndicator = false
         self.showsVerticalScrollIndicator = false
+        self.scrollsToTop = false
         self.isPagingEnabled = true
         self.backgroundColor = .clear
         self.delegate = self
