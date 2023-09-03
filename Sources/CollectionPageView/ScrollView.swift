@@ -43,10 +43,10 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
         if let next = self.nextValue, next != self.centerPage {
             if self.centerPage > next {
                 self.pages = Array(next.advanced(by: -bufferSize + 1)...next)
-                + Array(self.centerPage...self.centerPage.advanced(by: bufferSize))
+                    + Array(self.centerPage...self.centerPage.advanced(by: bufferSize))
             } else {
                 self.pages = Array(self.centerPage.advanced(by: -bufferSize)...self.centerPage)
-                + Array(next...next.advanced(by: bufferSize - 1))
+                    + Array(next...next.advanced(by: bufferSize - 1))
             }
         } else {
             self.pages = Array(self.centerPage.advanced(by: -bufferSize)...self.centerPage.advanced(by: bufferSize))
@@ -257,14 +257,14 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
     }
 
     func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
-//        self.animationCounter -= 1
-//        logger.info("Scrolling ended next=\(self.nextValue?.description ?? "none"), counter=\(self.animationCounter)")
-//        guard self.animationCounter == 0 else {
-//            return
-//        }
-//        self.updateSelection(force: true)
-//        self.ensurePaging()
-//        self.recenter(force: true)
+        //        self.animationCounter -= 1
+        //        logger.info("Scrolling ended next=\(self.nextValue?.description ?? "none"), counter=\(self.animationCounter)")
+        //        guard self.animationCounter == 0 else {
+        //            return
+        //        }
+        //        self.updateSelection(force: true)
+        //        self.ensurePaging()
+        //        self.recenter(force: true)
     }
 
     func ensurePaging() {

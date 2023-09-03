@@ -53,7 +53,7 @@ struct ContentView: View {
                 PageContent(value: value)
             }
             .environmentObject(state)
-//            .padding(.horizontal, CGFloat(selected))
+            //            .padding(.horizontal, CGFloat(selected))
         }
     }
 }
