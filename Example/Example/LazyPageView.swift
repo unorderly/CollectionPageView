@@ -191,7 +191,6 @@ class BuglessPageViewController: UIPageViewController, UIScrollViewDelegate {
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        print(#function, scrollView.contentOffset, scrollView.contentSize)
         if preventScrollBug {
             scrollView.setContentOffset(CGPoint(x: view.frame.width, y: 0), animated: false)
         }

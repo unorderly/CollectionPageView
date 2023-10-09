@@ -239,19 +239,13 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
     }
 
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        print(#function, self.isDecelerating)
         if self.isDecelerating {
             self.recenter(force: true)
         }
         self.nextValue = nil
     }
 
-    func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {
-        print(#function)
-    }
-
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        print(#function)
         self.updateSelection(force: true)
         self.ensurePaging()
         self.recenter(force: true)
