@@ -1,25 +1,13 @@
-//
-//  File.swift
-//
-//
-//  Created by Leo Mehlig on 21.11.22.
-//
-
-import UIKit
 import Combine
 import os.log
+import UIKit
 
-private let logger = Logger(
-    subsystem: Bundle.main.bundleIdentifier!,
-    category: "PageView"
-)
+private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!,
+                            category: "PageView")
 class ScrollPageView<Cell: UIView, Value: Hashable>:
     UIScrollView, UIScrollViewDelegate
-where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomStringConvertible {
-
-
+    where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomStringConvertible {
     let publisher: CurrentValueSubject<Value, Never>
-
 
     private var selected: Value {
         didSet {
@@ -42,14 +30,14 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
     private func updatePages() {
         if let next = self.nextValue, next != self.centerPage {
             if self.centerPage > next {
-                self.pages = Array(next.advanced(by: -bufferSize + 1)...next)
-                    + Array(self.centerPage...self.centerPage.advanced(by: bufferSize))
+                self.pages = Array(next.advanced(by: -self.bufferSize + 1)...next)
+                    + Array(self.centerPage...self.centerPage.advanced(by: self.bufferSize))
             } else {
-                self.pages = Array(self.centerPage.advanced(by: -bufferSize)...self.centerPage)
-                    + Array(next...next.advanced(by: bufferSize - 1))
+                self.pages = Array(self.centerPage.advanced(by: -self.bufferSize)...self.centerPage)
+                    + Array(next...next.advanced(by: self.bufferSize - 1))
             }
         } else {
-            self.pages = Array(self.centerPage.advanced(by: -bufferSize)...self.centerPage.advanced(by: bufferSize))
+            self.pages = Array(self.centerPage.advanced(by: -self.bufferSize)...self.centerPage.advanced(by: self.bufferSize))
         }
     }
 
@@ -73,7 +61,7 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
 
     var animator: UIViewPropertyAnimator?
     func select(value: Value) {
-        if value != self.nextValue && (self.selected != value || self.nextValue != nil) {
+        if value != self.nextValue, self.selected != value || self.nextValue != nil {
             self.nextValue = value
             DispatchQueue.main.async {
                 self.publisher.send(value)
@@ -87,7 +75,7 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
             animator.addAnimations {
                 self.setContentOffset(self.offset(for: value), animated: false)
             }
-            animator.addCompletion { position in
+            animator.addCompletion { _ in
                 self.updateSelection(force: true)
                 self.ensurePaging()
                 self.recenter(force: true)
@@ -98,10 +86,10 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
     }
 
     func updateViews() {
-        var (reusableCells, reusablePlaceholders) = self.views.filter({ !self.pages.contains($0.key) }).values
-            .compactMapSplit({ $0 as? Cell })
+        var (reusableCells, reusablePlaceholders) = self.views.filter { !self.pages.contains($0.key) }.values
+            .compactMapSplit { $0 as? Cell }
         var updated: [Value: UIView] = [:]
-        for value in pages {
+        for value in self.pages {
             if let existing = self.views[value] {
                 if !self.isViewVisible(for: value), let cell = existing as? Cell {
                     let new: UIView
@@ -138,14 +126,13 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
                     }
                     updated[value] = new
                 }
-
             }
         }
-        reusableCells.forEach {
-            $0.removeFromSuperview()
+        for reusableCell in reusableCells {
+            reusableCell.removeFromSuperview()
         }
-        reusablePlaceholders.forEach {
-            $0.removeFromSuperview()
+        for reusablePlaceholder in reusablePlaceholders {
+            reusablePlaceholder.removeFromSuperview()
         }
         self.views = updated
         self.forceRelayout = true
@@ -153,12 +140,12 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
     }
 
     func isViewVisible(for value: Value) -> Bool {
-        if value == selected || value == self.nextValue {
+        if value == self.selected || value == self.nextValue {
             return true
         } else {
             let offset = self.offset(for: value).x
-            return (self.contentOffset.x ..< self.contentOffset.x + self.bounds.width)
-                .overlaps(offset ..< offset + self.bounds.width)
+            return (self.contentOffset.x..<self.contentOffset.x + self.bounds.width)
+                .overlaps(offset..<offset + self.bounds.width)
         }
     }
 
@@ -177,8 +164,8 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        if oldSize != self.bounds.size || forceRelayout {
-            forceRelayout = false
+        if self.oldSize != self.bounds.size || self.forceRelayout {
+            self.forceRelayout = false
             let oldOffset = self.contentOffset.x
 
             self.contentSize = CGSize(width: self.bounds.width * CGFloat(self.views.count),
@@ -191,7 +178,7 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
             if self.oldSize.width <= 0 {
                 self.contentOffset = self.offset(for: self.selected)
             } else {
-                self.contentOffset.x = oldOffset / oldSize.width * self.bounds.width
+                self.contentOffset.x = oldOffset / self.oldSize.width * self.bounds.width
             }
             self.oldSize = self.bounds.size
         }
@@ -209,7 +196,6 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
                 oldView.removeFromSuperview()
                 self.addSubview(cell)
                 self.views[value] = cell
-
             }
         }
     }
@@ -220,8 +206,9 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
         }
         let offset = self.offset(for: self.selected).x
         guard force
-                || self.contentOffset.x <= offset - self.bounds.width
-                || self.contentOffset.x >= offset + self.bounds.width else {
+            || self.contentOffset.x <= offset - self.bounds.width
+            || self.contentOffset.x >= offset + self.bounds.width
+        else {
             return
         }
         let index = Int(round(self.contentOffset.x / self.bounds.width))
@@ -256,13 +243,13 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
         guard self.bounds.width > 0 else {
             return
         }
-        let centerOffset = self.offset(for: centerPage)
-        let selectedOffset = self.offset(for: selected)
+        let centerOffset = self.offset(for: self.centerPage)
+        let selectedOffset = self.offset(for: self.selected)
         if (!self.isDecelerating && abs(centerOffset.x - selectedOffset.x) / self.bounds.width >= CGFloat(self.bufferSize))
             || (force && self.centerPage != self.selected) {
             self.centerPage = self.selected
             self.updatePages()
-            let newOffset = self.offset(for: selected)
+            let newOffset = self.offset(for: self.selected)
             self.contentOffset.x = self.contentOffset.x + (newOffset.x - selectedOffset.x)
             self.updateViews()
         }

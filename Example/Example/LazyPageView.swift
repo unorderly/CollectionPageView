@@ -1,7 +1,6 @@
 import SwiftUI
 import UIKit
 
-
 struct LazyPageView<Content: View>: UIViewControllerRepresentable {
     @Binding var current: Int
 
@@ -14,7 +13,7 @@ struct LazyPageView<Content: View>: UIViewControllerRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(page: $current,
+        Coordinator(page: self.$current,
                     content: self.content)
     }
 
@@ -106,7 +105,6 @@ struct LazyPageView<Content: View>: UIViewControllerRepresentable {
     }
 }
 
-
 class TaggedHostingController<Content: View, Tag: CustomStringConvertible>: UIHostingController<Content> {
     var tag: Tag
 
@@ -129,8 +127,8 @@ class TaggedHostingController<Content: View, Tag: CustomStringConvertible>: UIHo
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        if applyDropTargetFix {
-            applyDropTargetFix = false
+        if self.applyDropTargetFix {
+            self.applyDropTargetFix = false
             if let interactions = self.view.interactions.compactMap({ $0 as? UIDropInteraction }).first {
                 let contextKey = "context"
                 if interactions.responds(to: Selector((contextKey))), interactions.value(forKey: contextKey) != nil {
@@ -141,12 +139,10 @@ class TaggedHostingController<Content: View, Tag: CustomStringConvertible>: UIHo
                 }
             }
         }
-
     }
 }
 
 extension UIPageViewController {
-
     var scrollView: UIScrollView! {
         for view in view.subviews {
             if let scrollView = view as? UIScrollView {
@@ -155,17 +151,14 @@ extension UIPageViewController {
         }
         return nil
     }
-
 }
 
 protocol BuglessPageViewControllerDelegate: UIPageViewControllerDelegate {
     func fixDropTargets(for controllers: [UIViewController])
 }
 
-
 // WORKAROUND: Fixes a bug, where dragging to the side of the page view would move the page and the next page would be empty: https://developer.apple.com/forums/thread/89396
 class BuglessPageViewController: UIPageViewController, UIScrollViewDelegate {
-
     private var preventScrollBug = true
 
     override func viewDidLoad() {
@@ -175,7 +168,7 @@ class BuglessPageViewController: UIPageViewController, UIScrollViewDelegate {
 
     override func setViewControllers(_ viewControllers: [UIViewController]?, direction: UIPageViewController.NavigationDirection, animated: Bool, completion: ((Bool) -> Void)? = nil) {
         if self.isViewLoaded {
-            preventScrollBug = false
+            self.preventScrollBug = false
         }
         super.setViewControllers(viewControllers, direction: direction, animated: animated) { completed in
             self.preventScrollBug = true
@@ -187,23 +180,22 @@ class BuglessPageViewController: UIPageViewController, UIScrollViewDelegate {
     }
 
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        preventScrollBug = false
+        self.preventScrollBug = false
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if preventScrollBug {
+        if self.preventScrollBug {
             scrollView.setContentOffset(CGPoint(x: view.frame.width, y: 0), animated: false)
         }
     }
 
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         if !decelerate {
-            preventScrollBug = true
+            self.preventScrollBug = true
         }
     }
 
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        preventScrollBug = true
+        self.preventScrollBug = true
     }
-
 }

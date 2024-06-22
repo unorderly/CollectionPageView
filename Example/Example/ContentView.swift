@@ -1,19 +1,12 @@
-//
-//  ContentView.swift
-//  Example
-//
-//  Created by Leo Mehlig on 20.11.22.
-//
-
-import SwiftUI
 import CollectionPageView
+import SwiftUI
 
 class ViewState: ObservableObject {
     @Published var offset: Int = 0
 }
 
 struct ContentView: View {
-    @State var selected = 0
+    @State private var selected = 0
 
     @StateObject var state = ViewState()
     var body: some View {
@@ -35,7 +28,6 @@ struct ContentView: View {
                 })
                 .keyboardShortcut(.rightArrow, modifiers: [.command])
 
-
                 Button("20") {
                     self.selected = 20
                 }
@@ -47,12 +39,11 @@ struct ContentView: View {
                 Button("Increase Offset") {
                     self.state.offset += 1
                 }
-
             }
-            PageView(selected: $selected) { value in
+            PageView(selected: self.$selected) { value in
                 PageContent(value: value)
             }
-            .environmentObject(state)
+            .environmentObject(self.state)
             //            .padding(.horizontal, CGFloat(selected))
         }
     }
@@ -61,24 +52,24 @@ struct ContentView: View {
 struct PageContent: View {
     var value: Int
 
-    @EnvironmentObject var state: ViewState
+    @EnvironmentObject private var state: ViewState
 
     var body: some View {
-        print("Body", value, state.offset)
         Self._printChanges()
         return VStack {
             Spacer()
             HStack {
                 Spacer()
-                Text("\(value + state.offset)")
+                Text("\(self.value + self.state.offset)")
                     .font(.largeTitle.bold())
                 Spacer()
             }
             Spacer()
         }
-        .background([Color.red, .blue, .green][abs((value + state.offset) % 3)])
+        .background([Color.red, .blue, .green][abs((self.value + self.state.offset) % 3)])
     }
 }
+
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()

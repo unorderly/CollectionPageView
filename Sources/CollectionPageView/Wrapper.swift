@@ -13,12 +13,11 @@ public struct PageView<Cell: View, Value: Hashable>: View where Value: Comparabl
     }
 
     public var body: some View {
-        PageViewWrapper(selected: $selected, cell: page)
+        PageViewWrapper(selected: self.$selected, cell: self.page)
     }
 }
 
 struct PageViewWrapper<Cell: View, Value: Hashable>: UIViewRepresentable where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomStringConvertible {
-
     @Binding var selected: Value
 
     let cell: (Value) -> Cell
@@ -44,7 +43,7 @@ struct PageViewWrapper<Cell: View, Value: Hashable>: UIViewRepresentable where V
     }
 
     func makeCoordinator() -> PickerModel<Value> {
-        PickerModel(selected: $selected)
+        PickerModel(selected: self.$selected)
     }
 }
 

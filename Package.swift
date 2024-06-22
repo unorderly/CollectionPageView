@@ -5,13 +5,13 @@ import PackageDescription
 
 let package = Package(name: "CollectionPageView",
                       platforms: [
-                        .iOS(.v14)
+                          .iOS(.v14)
                       ],
                       products: [
-                        .library(name: "CollectionPageView",
-                                 targets: ["CollectionPageView"])
+                          .library(name: "CollectionPageView",
+                                   targets: ["CollectionPageView"])
                       ],
                       targets: [
-                        .target(name: "CollectionPageView",
-                                dependencies: [])
+                          .target(name: "CollectionPageView",
+                                  dependencies: [])
                       ])
