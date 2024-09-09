@@ -185,6 +185,10 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
         self.updateSelection()
         self.recenter()
         self.checkVisible()
+        if self.traitCollection.layoutDirection == .rightToLeft {
+            self.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi))
+            self.subviews.forEach({ $0.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi)) })
+        }
     }
 
     func checkVisible() {
