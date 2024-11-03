@@ -19,7 +19,15 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
         }
     }
 
-    var configureCell: (Cell, Value) -> Void
+    var configureCell: (Cell, Value) -> Void {
+        didSet {
+            for (value, view) in self.views {
+                if let cell = view as? Cell, self.isViewVisible(for: value) {
+                    self.configureCell(cell, value)
+                }
+            }
+        }
+    }
 
     private var pages: [Value] = []
     private var nextValue: Value?

@@ -69,14 +69,18 @@ final class UIHostingView<Content: View>: UIView {
     private var hosting: UIHostingController<Content>?
 
     func set(value content: Content) {
-        self.hosting?.view.removeFromSuperview()
-        let hosting = UIHostingController(rootView: content)
-        self.backgroundColor = .clear
-        hosting.view.translatesAutoresizingMaskIntoConstraints = false
-        hosting.view.backgroundColor = .clear
-        self.hosting = hosting
-        self.addSubview(hosting.view)
-        self.setNeedsLayout()
+        if let hosting {
+            hosting.rootView = content
+        } else {
+            self.hosting?.view.removeFromSuperview()
+            let hosting = UIHostingController(rootView: content)
+            self.backgroundColor = .clear
+            hosting.view.translatesAutoresizingMaskIntoConstraints = false
+            hosting.view.backgroundColor = .clear
+            self.hosting = hosting
+            self.addSubview(hosting.view)
+            self.setNeedsLayout()
+        }
     }
 
     override func layoutSubviews() {
