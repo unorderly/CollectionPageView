@@ -6,23 +6,33 @@ public struct PageView<Cell: View, Value: Hashable>: View where Value: Comparabl
 
     let page: (Value) -> Cell
 
+    var ignoreSafeArea: Bool
+
     public init(selected: Binding<Value>,
-                page: @escaping (Value) -> Cell) {
+                page: @escaping (Value) -> Cell,
+                ignoreSafeArea: Bool = true) {
         self._selected = selected
         self.page = page
+        self.ignoreSafeArea = ignoreSafeArea
     }
 
     public var body: some View {
-        GeometryReader { proxy in
+        if self.ignoreSafeArea {
+            GeometryReader { proxy in
+                PageViewWrapper(selected: self.$selected, cell: { value in
+                    self.page(value)
+                        .safeAreaInset(edge: .bottom, spacing: 0, content: { Color.clear.frame(height: proxy.safeAreaInsets.bottom) })
+                        .safeAreaInset(edge: .top, spacing: 0, content: { Color.clear.frame(height: proxy.safeAreaInsets.top) })
+                        .safeAreaInset(edge: .leading, spacing: 0, content: { Color.clear.frame(width: proxy.safeAreaInsets.leading) })
+                        .safeAreaInset(edge: .trailing, spacing: 0, content: { Color.clear.frame(width: proxy.safeAreaInsets.trailing) })
+                        .ignoresSafeArea()
+                })
+                .ignoresSafeArea()
+            }
+        } else {
             PageViewWrapper(selected: self.$selected, cell: { value in
                 self.page(value)
-                    .safeAreaInset(edge: .bottom, spacing: 0, content: { Color.clear.frame(height: proxy.safeAreaInsets.bottom) })
-                    .safeAreaInset(edge: .top, spacing: 0, content: { Color.clear.frame(height: proxy.safeAreaInsets.top) })
-                    .safeAreaInset(edge: .leading, spacing: 0, content: { Color.clear.frame(width: proxy.safeAreaInsets.leading) })
-                    .safeAreaInset(edge: .trailing, spacing: 0, content: { Color.clear.frame(width: proxy.safeAreaInsets.trailing) })
-                    .ignoresSafeArea()
             })
-                .ignoresSafeArea()
         }
     }
 }
