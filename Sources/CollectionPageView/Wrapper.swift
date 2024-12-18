@@ -21,10 +21,10 @@ public struct PageView<Cell: View, Value: Hashable>: View where Value: Comparabl
             GeometryReader { proxy in
                 PageViewWrapper(selected: self.$selected, cell: { value in
                     self.page(value)
-                        .safeAreaInset(edge: .bottom, spacing: 0, content: { Color.clear.frame(height: proxy.safeAreaInsets.bottom) })
-                        .safeAreaInset(edge: .top, spacing: 0, content: { Color.clear.frame(height: proxy.safeAreaInsets.top) })
-                        .safeAreaInset(edge: .leading, spacing: 0, content: { Color.clear.frame(width: proxy.safeAreaInsets.leading) })
-                        .safeAreaInset(edge: .trailing, spacing: 0, content: { Color.clear.frame(width: proxy.safeAreaInsets.trailing) })
+                        .safeAreaInset(edge: .bottom, spacing: 0, content: { Color.clear.frame(height: max(0, proxy.safeAreaInsets.bottom)) })
+                        .safeAreaInset(edge: .top, spacing: 0, content: { Color.clear.frame(height: max(0, proxy.safeAreaInsets.top)) })
+                        .safeAreaInset(edge: .leading, spacing: 0, content: { Color.clear.frame(width: max(0, proxy.safeAreaInsets.leading)) })
+                        .safeAreaInset(edge: .trailing, spacing: 0, content: { Color.clear.frame(width: max(0, proxy.safeAreaInsets.trailing)) })
                         .ignoresSafeArea()
                 })
                 .ignoresSafeArea()
