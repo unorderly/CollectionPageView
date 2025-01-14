@@ -144,8 +144,9 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
             return true
         } else {
             let offset = self.offset(for: value).x
-            return (self.contentOffset.x..<self.contentOffset.x + self.bounds.width)
-                .overlaps(offset..<offset + self.bounds.width)
+            let threshold: CGFloat = min(2, self.bounds.width)
+            let viewBounds = (self.contentOffset.x + threshold)..<(self.contentOffset.x + self.bounds.width - threshold)
+            return viewBounds.overlaps(offset..<offset + self.bounds.width)
         }
     }
 
@@ -162,6 +163,14 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
     var oldSize = CGSize.zero
     var forceRelayout = false
 
+    var hasActiveScroll: Bool {
+        if #available(iOS 17.4, *), self.isScrollAnimating {
+            return true
+        } else {
+            return self.isDragging || self.isTracking || self.isDecelerating
+        }
+    }
+
     override func layoutSubviews() {
         super.layoutSubviews()
         if self.oldSize != self.bounds.size || self.forceRelayout {
@@ -175,7 +184,8 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
                                      y: 0)
                 self.views[value]?.frame = CGRect(origin: offset, size: self.bounds.size)
             }
-            if self.oldSize.width <= 0 {
+
+            if self.oldSize.width <= 0 || !hasActiveScroll {
                 self.contentOffset = self.offset(for: self.selected)
             } else {
                 self.contentOffset.x = oldOffset / self.oldSize.width * self.bounds.width
