@@ -185,7 +185,7 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
                 self.views[value]?.frame = CGRect(origin: offset, size: self.bounds.size)
             }
 
-            if self.oldSize.width <= 0 || !hasActiveScroll {
+            if self.oldSize.width <= 0 || !self.hasActiveScroll {
                 self.contentOffset = self.offset(for: self.selected)
             } else {
                 self.contentOffset.x = oldOffset / self.oldSize.width * self.bounds.width
@@ -197,7 +197,7 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
         self.checkVisible()
         if self.traitCollection.layoutDirection == .rightToLeft {
             self.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi))
-            self.subviews.forEach({ $0.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi)) })
+            self.subviews.forEach { $0.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi)) }
         }
     }
 
