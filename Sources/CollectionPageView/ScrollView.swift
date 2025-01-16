@@ -85,6 +85,12 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
         }
     }
 
+    func createPlaceholderView() -> UIView {
+        let view = UIView(frame: .zero)
+        view.backgroundColor = .clear
+        return view
+    }
+
     func updateViews() {
         var (reusableCells, reusablePlaceholders) = self.views.filter { !self.pages.contains($0.key) }.values
             .compactMapSplit { $0 as? Cell }
@@ -96,7 +102,7 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
                     if let reused = reusablePlaceholders.popLast() {
                         new = reused
                     } else {
-                        new = UIView(frame: .zero)
+                        new = self.createPlaceholderView()
                         self.addSubview(new)
                     }
                     updated[value] = new
@@ -121,7 +127,7 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
                     if let reused = reusablePlaceholders.popLast() {
                         new = reused
                     } else {
-                        new = UIView(frame: .zero)
+                        new = self.createPlaceholderView()
                         self.addSubview(new)
                     }
                     updated[value] = new
@@ -150,8 +156,12 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
         }
     }
 
+    func index(for value: Value) -> Int {
+        self.pages.firstIndex(of: value) ?? 0
+    }
+
     func offset(for value: Value) -> CGPoint {
-        let index = self.pages.firstIndex(of: value) ?? 0
+        let index = self.index(for: value)
         return .init(x: self.bounds.width * CGFloat(index), y: 0)
     }
 
@@ -173,9 +183,17 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
 
     override func layoutSubviews() {
         super.layoutSubviews()
+        var contentOffset: CGFloat = self.contentOffset.x
         if self.oldSize != self.bounds.size || self.forceRelayout {
             self.forceRelayout = false
-            let oldOffset = self.contentOffset.x
+            var oldOffset = self.contentOffset.x
+
+            // UIScrollView rounds the contentOffset sometimes, which can lead to `isViewVisible` reporting wrong views because of rounding errors when the view is resizing.
+            // We fix this, by using the real contentOffset of the visible page, incase we are not currently animating.
+            let oldSelectedOffset = self.oldSize.width * CGFloat(self.index(for: self.selected))
+            if abs(oldOffset - oldSelectedOffset) < 1, !self.hasActiveScroll {
+                oldOffset = oldSelectedOffset
+            }
 
             self.contentSize = CGSize(width: self.bounds.width * CGFloat(self.views.count),
                                       height: self.bounds.height)
@@ -185,11 +203,12 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
                 self.views[value]?.frame = CGRect(origin: offset, size: self.bounds.size)
             }
 
-            if self.oldSize.width <= 0 || !self.hasActiveScroll {
-                self.contentOffset = self.offset(for: self.selected)
+            if self.oldSize.width <= 0 {
+                contentOffset = self.offset(for: self.selected).x
             } else {
-                self.contentOffset.x = oldOffset / self.oldSize.width * self.bounds.width
+                contentOffset = oldOffset / self.oldSize.width * self.bounds.width
             }
+            self.contentOffset.x = contentOffset
             self.oldSize = self.bounds.size
         }
         self.updateSelection()
