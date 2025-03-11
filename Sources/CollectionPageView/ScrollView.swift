@@ -287,6 +287,15 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
             self.updateViews()
         }
     }
+
+    override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        if gestureRecognizer.view is ScrollPageView
+            && gestureRecognizer == self.panGestureRecognizer
+            && gestureRecognizer.numberOfTouches == 3 {
+            return false
+        }
+        return super.gestureRecognizerShouldBegin(gestureRecognizer)
+    }
 }
 
 extension Collection {
