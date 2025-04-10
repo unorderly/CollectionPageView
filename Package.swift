@@ -8,10 +8,15 @@ let package = Package(name: "CollectionPageView",
                         .iOS(.v16), .watchOS(.v9), .macCatalyst(.v16), .macOS(.v13)
                       ],
                       products: [
-                          .library(name: "CollectionPageView",
-                                   targets: ["CollectionPageView"])
+                        .library(name: "CollectionPageView",
+                                 targets: ["CollectionPageView"])
+                      ],
+                      dependencies: [
+                        .package(path: "../LogMacro")
                       ],
                       targets: [
-                          .target(name: "CollectionPageView",
-                                  dependencies: [])
+                        .target(name: "CollectionPageView",
+                                dependencies: [
+                                    .product(name: "LogMacro", package: "LogMacro")
+                                ])
                       ])
