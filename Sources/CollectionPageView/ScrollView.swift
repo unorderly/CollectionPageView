@@ -84,7 +84,14 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
         #logInfo("select called with value: \(value)")
         #logInfo("select current selected: \(self.selected), nextValue: \(String(describing: self.nextValue))")
 
+
         if value != self.nextValue, self.selected != value || self.nextValue != nil {
+            guard self.bounds.width > 0 else {
+                #logInfo("select called but bounds.width <= 0. Setting select from \(self.selected) to \(value) and returning")
+                self.selected = value
+                return
+            }
+            
             #logInfo("select: value differs from current selection or nextValue exists")
             self.nextValue = value
             #logInfo("select: set nextValue to \(value)")
@@ -347,6 +354,7 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
 
         guard self.bounds.width > 0 else {
             #logInfo("updateSelection: bounds width <= 0, returning")
+            self.nextValue = nil
             return
         }
 
