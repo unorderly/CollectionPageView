@@ -31,7 +31,7 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
     private var centerPage: Value
 
     static var logger: LogMacro.Logger {
-        Logger(isPersisted: true, subsystem: Bundle.main.bundleIdentifier ?? "", category: "PageView")
+        Logger(isPersisted: false, subsystem: Bundle.main.bundleIdentifier ?? "", category: "PageView")
     }
 
     private func updatePages() {

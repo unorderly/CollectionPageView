@@ -19,7 +19,7 @@ public struct PageView<Cell: View, Value: Hashable>: View where Value: Comparabl
     }
 
     static var logger: LogMacro.Logger {
-        Logger(isPersisted: true, subsystem: Bundle.main.bundleIdentifier ?? "", category: "PageView")
+        Logger(isPersisted: false, subsystem: Bundle.main.bundleIdentifier ?? "", category: "PageView")
     }
 
     public var body: some View {
@@ -58,7 +58,7 @@ struct PageViewWrapper<Cell: View, Value: Hashable>: UIViewRepresentable where V
     }
 
     static var logger: LogMacro.Logger {
-        Logger(isPersisted: true, subsystem: Bundle.main.bundleIdentifier ?? "", category: "PageView")
+        Logger(isPersisted: false, subsystem: Bundle.main.bundleIdentifier ?? "", category: "PageView")
     }
 
     func updateUIView(_ picker: UIViewType, context: Context) {
@@ -98,7 +98,7 @@ class PickerModel<Value: Hashable> {
     }
 
     static var logger: LogMacro.Logger {
-        Logger(isPersisted: true, subsystem: Bundle.main.bundleIdentifier ?? "", category: "PageView")
+        Logger(isPersisted: false, subsystem: Bundle.main.bundleIdentifier ?? "", category: "PageView")
     }
 
     func listing<P: Publisher>(to publisher: P) where P.Output == Value, P.Failure == Never {
@@ -118,7 +118,7 @@ class PickerModel<Value: Hashable> {
 final class UIHostingView<Content: View>: UIView {
     private var hosting: UIHostingController<Content>?
     static var logger: LogMacro.Logger {
-        Logger(isPersisted: true, subsystem: Bundle.main.bundleIdentifier ?? "", category: "PageView")
+        Logger(isPersisted: false, subsystem: Bundle.main.bundleIdentifier ?? "", category: "PageView")
     }
 
     func set(value content: Content) {
