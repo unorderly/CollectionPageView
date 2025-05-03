@@ -6,7 +6,7 @@ import LogMacro
 
 class ScrollPageView<Cell: UIView, Value: Hashable>:
     UIScrollView, UIScrollViewDelegate
-where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomStringConvertible {
+    where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomStringConvertible {
     let publisher: CurrentValueSubject<Value, Never>
 
     private var selected: Value {
@@ -43,11 +43,11 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
             if self.centerPage > next {
                 #logInfo("updatePages: centerPage > next")
                 self.pages = Array(next.advanced(by: -self.bufferSize + 1)...next)
-                + Array(self.centerPage...self.centerPage.advanced(by: self.bufferSize))
+                    + Array(self.centerPage...self.centerPage.advanced(by: self.bufferSize))
             } else {
                 #logInfo("updatePages: centerPage <= next")
                 self.pages = Array(self.centerPage.advanced(by: -self.bufferSize)...self.centerPage)
-                + Array(next...next.advanced(by: self.bufferSize - 1))
+                    + Array(next...next.advanced(by: self.bufferSize - 1))
             }
         } else {
             #logInfo("updatePages: using default page range")
@@ -84,14 +84,13 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
         #logInfo("select called with value: \(value)")
         #logInfo("select current selected: \(self.selected), nextValue: \(String(describing: self.nextValue))")
 
-
         if value != self.nextValue, self.selected != value || self.nextValue != nil {
             guard self.bounds.width > 0 else {
                 #logInfo("select called but bounds.width <= 0. Setting select from \(self.selected) to \(value) and returning")
                 self.selected = value
                 return
             }
-            
+
             #logInfo("select: value differs from current selection or nextValue exists")
             self.nextValue = value
             #logInfo("select: set nextValue to \(value)")
@@ -362,8 +361,8 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
         #logInfo("updateSelection: selected offset: \(offset), contentOffset: \(self.contentOffset.x)")
 
         guard force
-                || self.contentOffset.x <= offset - self.bounds.width
-                || self.contentOffset.x >= offset + self.bounds.width
+            || self.contentOffset.x <= offset - self.bounds.width
+            || self.contentOffset.x >= offset + self.bounds.width
         else {
             #logInfo("updateSelection: no update needed, returning")
             return
@@ -449,9 +448,9 @@ where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomSt
     override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         #logInfo("gestureRecognizerShouldBegin called")
 
-        if gestureRecognizer.view is ScrollPageView
-            && gestureRecognizer == self.panGestureRecognizer
-            && gestureRecognizer.numberOfTouches == 3 {
+        if gestureRecognizer.view is ScrollPageView,
+           gestureRecognizer == self.panGestureRecognizer,
+           gestureRecognizer.numberOfTouches == 3 {
             #logInfo("gestureRecognizerShouldBegin: blocking 3-finger pan gesture")
             return false
         }

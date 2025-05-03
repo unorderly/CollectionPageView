@@ -1,6 +1,6 @@
 import Combine
-import SwiftUI
 import LogMacro
+import SwiftUI
 
 public struct PageView<Cell: View, Value: Hashable>: View where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomStringConvertible {
     @Binding var selected: Value
@@ -74,8 +74,8 @@ struct PageViewWrapper<Cell: View, Value: Hashable>: UIViewRepresentable where V
         #logInfo("PageViewWrapper makeUIView called")
         let picker = UIViewType(selected: self.selected,
                                 configureCell: {
-            $0.set(value: self.cell($1))
-        })
+                                    $0.set(value: self.cell($1))
+                                })
         #logInfo("PageViewWrapper setting up coordinator to listen to picker publisher")
         context.coordinator.listing(to: picker.publisher)
         return picker
