@@ -4,7 +4,7 @@ import UIKit
 import LogMacro
 
 class ScrollPageView<Cell: UIView, Value: Hashable>:
-    UIScrollView, UIScrollViewDelegate
+    UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelegate
     where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomStringConvertible {
     let publisher: CurrentValueSubject<Value, Never>
 
@@ -327,6 +327,21 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
 
         let result = super.gestureRecognizerShouldBegin(gestureRecognizer)
         return result
+    }
+
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        if otherGestureRecognizer.name == "io.unorderly.pull_down.scroll_view" {
+            return true
+        }
+        return false
+    }
+
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        if otherGestureRecognizer.name == "io.unorderly.pull_down.scroll_view" {
+            return true
+        }
+        return false
+
     }
 }
 
