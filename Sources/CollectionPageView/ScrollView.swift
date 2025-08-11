@@ -83,7 +83,7 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
             animator.addAnimations {
                 self.setContentOffset(self.offset(for: value), animated: false)
             }
-            animator.addCompletion { position in
+            animator.addCompletion { _ in
                 self.updateSelection(force: true)
                 self.ensurePaging()
                 self.recenter(force: true)
@@ -199,7 +199,7 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
     }
 
     override func layoutSubviews() {
-       super.layoutSubviews()
+        super.layoutSubviews()
         var contentOffset: CGFloat = self.contentOffset.x
         if self.oldSize != self.bounds.size || self.forceRelayout {
             self.forceRelayout = false
@@ -341,7 +341,6 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
             return true
         }
         return false
-
     }
 }
 
