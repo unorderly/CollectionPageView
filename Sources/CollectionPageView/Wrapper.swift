@@ -1,5 +1,4 @@
 import Combine
-import LogMacro
 import SwiftUI
 
 public struct PageView<Cell: View, Value: Hashable>: View where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomStringConvertible {

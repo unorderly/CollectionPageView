@@ -1,8 +1,6 @@
 import Combine
 import UIKit
 
-import LogMacro
-
 class ScrollPageView<Cell: UIView, Value: Hashable>:
     UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelegate
     where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomStringConvertible {
