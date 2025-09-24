@@ -56,6 +56,9 @@ struct PageViewWrapper<Cell: View, Value: Hashable>: UIViewRepresentable where V
             $0.set(value: self.cell($1))
         }
         picker.select(value: self.selected)
+        picker.updateCells {
+            $0.update(value: self.cell($1))
+        }
     }
 
     func makeUIView(context: Context) -> UIViewType {
@@ -108,6 +111,10 @@ final class UIHostingView<Content: View>: UIView {
 
         self.addSubview(hosting.view)
         self.setNeedsLayout()
+    }
+
+    func update(value content: Content) {
+        self.hosting?.rootView = content
     }
 
     override func layoutSubviews() {

@@ -20,6 +20,14 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
 
     var configureCell: (Cell, Value) -> Void
 
+    func updateCells(_ update: (Cell, Value) -> Void) {
+        for (value, view) in views {
+            if let cell = view as? Cell {
+                update(cell, value)
+            }
+        }
+    }
+
     private var pages: [Value] = []
     private var nextValue: Value?
     private var bufferSize = 2
