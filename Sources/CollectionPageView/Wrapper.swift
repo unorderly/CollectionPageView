@@ -22,10 +22,7 @@ public struct PageView<Cell: View, Value: Hashable>: View where Value: Comparabl
             GeometryReader { proxy in
                 PageViewWrapper(selected: self.$selected, cell: { value in
                     self.page(value)
-                        .safeAreaInset(edge: .bottom, spacing: 0, content: { Color.clear.frame(height: proxy.safeAreaInsets.bottom) })
-                        .safeAreaInset(edge: .top, spacing: 0, content: { Color.clear.frame(height: proxy.safeAreaInsets.top) })
-                        .safeAreaInset(edge: .leading, spacing: 0, content: { Color.clear.frame(width: proxy.safeAreaInsets.leading) })
-                        .safeAreaInset(edge: .trailing, spacing: 0, content: { Color.clear.frame(width: proxy.safeAreaInsets.trailing) })
+                        .safeAreaPadding(proxy.safeAreaInsets)
                         .ignoresSafeArea()
                 })
                 .ignoresSafeArea()
@@ -57,7 +54,7 @@ struct PageViewWrapper<Cell: View, Value: Hashable>: UIViewRepresentable where V
         }
         picker.select(value: self.selected)
         picker.updateCells {
-            $0.update(value: self.cell($1))
+            $0.updateIfNeeded(value: self.cell($1))
         }
     }
 
@@ -97,6 +94,7 @@ class PickerModel<Value: Hashable> {
 
 final class UIHostingView<Content: View>: UIView {
     private var hosting: UIHostingController<Content>?
+    private var lastFrame: CGRect?
 
     func set(value content: Content) {
         if let hosting = self.hosting {
@@ -111,10 +109,15 @@ final class UIHostingView<Content: View>: UIView {
 
         self.addSubview(hosting.view)
         self.setNeedsLayout()
+        self.lastFrame = self.bounds
     }
 
-    func update(value content: Content) {
-        self.hosting?.rootView = content
+    /// Only updating if the frame changed, since the only case we found is if we resize the window in collapsed timeline mode.
+    func updateIfNeeded(value content: Content) {
+        if self.lastFrame != self.bounds {
+            self.hosting?.rootView = content
+            self.lastFrame = self.bounds
+        }
     }
 
     override func layoutSubviews() {
