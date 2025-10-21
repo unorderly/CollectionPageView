@@ -91,7 +91,7 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
             animator.addAnimations {
                 self.setContentOffset(self.offset(for: value), animated: false)
             }
-            animator.addCompletion { position in
+            animator.addCompletion { _ in
                 self.updateSelection(force: true)
                 self.ensurePaging()
                 self.recenter(force: true)
