@@ -68,7 +68,7 @@ struct PageViewWrapper<Cell: View, Value: Hashable>: UIViewRepresentable where V
     }
 
     func makeCoordinator() -> PickerModel<Value> {
-        return PickerModel(selected: self.$selected)
+        PickerModel(selected: self.$selected)
     }
 }
 

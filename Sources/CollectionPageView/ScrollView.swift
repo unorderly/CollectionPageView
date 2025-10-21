@@ -21,7 +21,7 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
     var configureCell: (Cell, Value) -> Void
 
     func updateCells(_ update: (Cell, Value) -> Void) {
-        for (value, view) in views {
+        for (value, view) in self.views {
             if let cell = view as? Cell {
                 update(cell, value)
             }
@@ -207,7 +207,7 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
     }
 
     override func layoutSubviews() {
-       super.layoutSubviews()
+        super.layoutSubviews()
         var contentOffset: CGFloat = self.contentOffset.x
         if self.oldSize != self.bounds.size || self.forceRelayout {
             self.forceRelayout = false
