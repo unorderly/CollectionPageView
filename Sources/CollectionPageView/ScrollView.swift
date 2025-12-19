@@ -80,7 +80,7 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
                 self.publisher.send(value)
             }
 
-            if let animator = animator, animator.isRunning {
+            if let animator, animator.isRunning {
                 animator.stopAnimation(true)
             }
 

@@ -55,11 +55,10 @@ struct LazyPageView<Content: View>: UIViewControllerRepresentable {
                 controller.rootView = self.content(current)
             } else {
                 let oldTag = (controller.viewControllers?.first as? Controller)?.tag ?? 0
-                let direction: UIPageViewController.NavigationDirection
-                if layoutDirection == .leftToRight {
-                    direction = oldTag < current ? .forward : .reverse
+                let direction: UIPageViewController.NavigationDirection = if layoutDirection == .leftToRight {
+                    oldTag < current ? .forward : .reverse
                 } else {
-                    direction = oldTag < current ? .reverse : .forward
+                    oldTag < current ? .reverse : .forward
                 }
                 controller.setViewControllers([
                     Controller(rootView: self.content(current), tag: current)
