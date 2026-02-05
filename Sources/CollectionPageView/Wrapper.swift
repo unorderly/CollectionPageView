@@ -18,6 +18,7 @@ public struct PageView<Cell: View, Value: Hashable>: View where Value: Comparabl
     }
 
     public var body: some View {
+        #if canImport(UIKit)
         if self.ignoreSafeArea {
             GeometryReader { proxy in
                 PageViewWrapper(selected: self.$selected, cell: { value in
@@ -32,8 +33,15 @@ public struct PageView<Cell: View, Value: Hashable>: View where Value: Comparabl
                 self.page(value)
             })
         }
+        #else
+        Text("PageView (macOS placeholder)")
+            .foregroundStyle(.secondary)
+        #endif
     }
 }
+
+#if canImport(UIKit)
+import UIKit
 
 struct PageViewWrapper<Cell: View, Value: Hashable>: UIViewRepresentable where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomStringConvertible {
     @Binding var selected: Value
@@ -128,3 +136,4 @@ final class UIHostingView<Content: View>: UIView {
         }
     }
 }
+#endif

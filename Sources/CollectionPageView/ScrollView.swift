@@ -1,3 +1,4 @@
+#if canImport(UIKit)
 import Combine
 import LogMacro
 import UIKit
@@ -346,3 +347,4 @@ extension Collection {
         return (filtered, rest)
     }
 }
+#endif
