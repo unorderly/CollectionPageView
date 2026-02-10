@@ -1,5 +1,4 @@
 import Combine
-import LogMacro
 import SwiftUI
 
 public struct PageView<Cell: View, Value: Hashable>: View where Value: Comparable, Value: Strideable, Value.Stride == Int, Value: CustomStringConvertible {
@@ -33,8 +32,19 @@ public struct PageView<Cell: View, Value: Hashable>: View where Value: Comparabl
                 self.page(value)
             })
         }
+        #elseif os(macOS)
+        if self.ignoreSafeArea {
+            PageViewWrapper(selected: self.$selected, cell: { value in
+                self.page(value)
+            })
+            .ignoresSafeArea()
+        } else {
+            PageViewWrapper(selected: self.$selected, cell: { value in
+                self.page(value)
+            })
+        }
         #else
-        Text("PageView (macOS placeholder)")
+        Text("PageView (platform placeholder)")
             .foregroundStyle(.secondary)
         #endif
     }
