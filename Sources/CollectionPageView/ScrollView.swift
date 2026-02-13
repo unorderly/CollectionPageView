@@ -1,7 +1,6 @@
 import Combine
-import UIKit
-
 import LogMacro
+import UIKit
 
 class ScrollPageView<Cell: UIView, Value: Hashable>:
     UIScrollView, UIScrollViewDelegate
@@ -173,20 +172,17 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
             let offset = self.offset(for: value).x
             let threshold: CGFloat = min(2, self.bounds.width)
             let viewBounds = (self.contentOffset.x + threshold)..<(self.contentOffset.x + self.bounds.width - threshold)
-            let result = viewBounds.overlaps(offset..<offset + self.bounds.width)
-            return result
+            return viewBounds.overlaps(offset..<offset + self.bounds.width)
         }
     }
 
     func index(for value: Value) -> Int {
-        let result = self.pages.firstIndex(of: value) ?? 0
-        return result
+        self.pages.firstIndex(of: value) ?? 0
     }
 
     func offset(for value: Value) -> CGPoint {
         let index = self.index(for: value)
-        let result = CGPoint(x: self.bounds.width * CGFloat(index), y: 0)
-        return result
+        return CGPoint(x: self.bounds.width * CGFloat(index), y: 0)
     }
 
     @available(*, unavailable)
@@ -199,10 +195,9 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
 
     var hasActiveScroll: Bool {
         if #available(iOS 17.4, *), self.isScrollAnimating {
-            return true
+            true
         } else {
-            let result = self.isDragging || self.isTracking || self.isDecelerating
-            return result
+            self.isDragging || self.isTracking || self.isDecelerating
         }
     }
 
@@ -333,8 +328,7 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
             return false
         }
 
-        let result = super.gestureRecognizerShouldBegin(gestureRecognizer)
-        return result
+        return super.gestureRecognizerShouldBegin(gestureRecognizer)
     }
 }
 
