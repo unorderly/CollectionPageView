@@ -75,16 +75,18 @@ struct PageViewWrapper<Cell: View, Value: Hashable>: UIViewRepresentable where V
 class PickerModel<Value: Hashable> {
     @Binding var selected: Value
 
-    private var cancallable: AnyCancellable?
+    private var cancellable: AnyCancellable?
 
     init(selected: Binding<Value>) {
         self._selected = selected
     }
 
     func listing<P: Publisher>(to publisher: P) where P.Output == Value, P.Failure == Never {
-        DispatchQueue.main.async {
-            self.cancallable?.cancel()
-            self.cancallable = publisher
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+
+            self.cancellable?.cancel()
+            self.cancellable = publisher
                 .sink { [weak self] value in
                     self?.selected = value
                 }
