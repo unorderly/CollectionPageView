@@ -7,7 +7,7 @@ struct LazyPageView<Content: View>: UIViewControllerRepresentable {
     let content: (Int) -> Content
 
     init(selected: Binding<Int>,
-         @ViewBuilder page: @escaping (Int) -> Content) {
+         @ContentBuilder page: @escaping (Int) -> Content) {
         _current = selected
         self.content = page
     }
