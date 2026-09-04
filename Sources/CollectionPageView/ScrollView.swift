@@ -60,6 +60,9 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
         self.isPagingEnabled = true
         self.backgroundColor = .clear
         self.delegate = self
+        if #available(iOS 26.0, *) {
+            self.topEdgeEffect.isHidden = true
+        }
         self.updatePages()
         self.updateViews()
         self.contentOffset = self.offset(for: self.selected)
