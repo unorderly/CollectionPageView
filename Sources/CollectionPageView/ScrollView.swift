@@ -58,6 +58,10 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
         self.showsVerticalScrollIndicator = false
         self.scrollsToTop = false
         self.isPagingEnabled = true
+        // Pages are laid out and paged by the bounds width, and cells inset themselves for the safe area, so
+        // horizontal safe area insets (e.g. a vertical bar or the status column on the iPhone Duo) must not
+        // shift the content and misalign the pages.
+        self.contentInsetAdjustmentBehavior = .never
         self.backgroundColor = .clear
         self.delegate = self
         if #available(iOS 26.0, *) {
@@ -227,7 +231,9 @@ class ScrollPageView<Cell: UIView, Value: Hashable>:
                 self.views[value]?.frame = CGRect(origin: offset, size: self.bounds.size)
             }
 
-            if self.oldSize.width <= 0 {
+            if self.oldSize.width <= 0 || (!self.hasActiveScroll && self.nextValue == nil) {
+                // At rest the selected page is the only valid position. Snapping to it also recovers from offsets
+                // UIKit adjusted while the bounds changed, e.g. when the iPhone Duo switches displays.
                 contentOffset = self.offset(for: self.selected).x
             } else {
                 contentOffset = oldOffset / self.oldSize.width * self.bounds.width
